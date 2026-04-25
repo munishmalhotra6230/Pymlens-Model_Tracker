@@ -63,6 +63,7 @@ streamlit run dashboard.py
 - Then Train the model withing declaring a experiment(
 NOTE:Choose Experiment name on the basis of problem you are working on  Like : Problem_Datasetname)
 -and after that dasboard command to visualize the experiments 
+# gif
 ![alt text](<Screen Recording 2026-04-25 211626.gif>)
 ## Screen shots:
 ![alt text](<Screenshot 2026-04-25 205636.png>) ![alt text](<Screenshot 2026-04-25 191931.png>) ![alt text](<Screenshot 2026-04-25 205210.png>) ![alt text](<Screenshot 2026-04-25 205516.png>) ![alt text](<Screenshot 2026-04-25 205552.png>) ![alt text](<Screenshot 2026-04-25 205624.png>)
