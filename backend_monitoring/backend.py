@@ -2,12 +2,19 @@ from flask import Flask, request, jsonify
 import duckdb
 import json
 app=Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FOLDER = os.path.join(BASE_DIR, "db_path")
+
+os.makedirs(DB_FOLDER, exist_ok=True)
+
+DB_FILE = os.path.join(DB_FOLDER, "ML_experiments.db")
+
 try:
-    Experiment_db = duckdb.connect(r"\db_path\ML_experiments.db")
+    Experiment_db = duckdb.connect(DB_FILE)
+    print(f"Database connected at: {DB_FILE}")
 except duckdb.IOException as e:
-    print("Could not open DB file (locked by another process):", e)
-    print("Falling back to in-memory DuckDB. Persistent DB will not be available.")
-    Experiment_db = duckdb.connect(":memory:")
+    print("DB connection failed:", e)
+    raise e   # ❌ don't silently fall back
 
 Experiment_db.execute("""
 CREATE SEQUENCE IF NOT EXISTS experiment_id_seq;
