@@ -3,7 +3,7 @@ import duckdb
 import json
 app=Flask(__name__)
 try:
-    Experiment_db = duckdb.connect(r"C:\Users\Laptop Zone PTK\OneDrive\Desktop\model_tracker(MLENS)\db_path\ML_experiments.db")
+    Experiment_db = duckdb.connect(r"\db_path\ML_experiments.db")
 except duckdb.IOException as e:
     print("Could not open DB file (locked by another process):", e)
     print("Falling back to in-memory DuckDB. Persistent DB will not be available.")
