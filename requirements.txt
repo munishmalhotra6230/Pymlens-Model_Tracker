@@ -1,0 +1,9 @@
+Flask
+requests
+scikit-learn
+numpy
+pandas
+streamlit
+plotly
+streamlit-agraph
+duckdb
