@@ -29,7 +29,6 @@ Install dependencies
 Start the server
 
 ```bash
-    mkdir db_path
     cd backend_monitoring
     python backend.py 
 ```
