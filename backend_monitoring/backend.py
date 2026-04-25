@@ -1,10 +1,19 @@
 from flask import Flask, request, jsonify
 import duckdb
 import json
+from pathlib import Path
 
-app=Flask(__name__)
+app = Flask(__name__)
+
+# Ensure the repository-level `db_path` directory exists and use an
+# absolute path so the DB file is created in the project root.
+repo_root = Path(__file__).resolve().parent.parent
+db_dir = repo_root / "db_path"
+db_dir.mkdir(parents=True, exist_ok=True)
+db_file = str(db_dir / "ML_experiments.db")
+
 try:
-    Experiment_db = duckdb.connect(r"db_path\ML_experiments.db")
+    Experiment_db = duckdb.connect(db_file)
 except duckdb.IOException as e:
     print("Could not open DB file (locked by another process):", e)
     print("Falling back to in-memory DuckDB. Persistent DB will not be available.")
