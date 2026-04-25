@@ -118,6 +118,8 @@ If you have any feedback, please reach out to us on discord here is the link to 
 
 ## 🔗 Links
 [![portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://munish1234.pythonanywhere.com/)
+## Screen shots:
+![alt text](<Screenshot 2026-04-25 205636.png>) ![alt text](<Screenshot 2026-04-25 191931.png>) ![alt text](<Screenshot 2026-04-25 205210.png>) ![alt text](<Screenshot 2026-04-25 205516.png>) ![alt text](<Screenshot 2026-04-25 205552.png>) ![alt text](<Screenshot 2026-04-25 205624.png>)
 
 ## Authors
 
