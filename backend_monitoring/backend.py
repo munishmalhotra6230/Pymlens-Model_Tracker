@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 import duckdb
 import json
-import os 
+
 app=Flask(__name__)
 try:
     Experiment_db = duckdb.connect(r"db_path\ML_experiments.db")
