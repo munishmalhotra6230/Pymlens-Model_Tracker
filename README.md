@@ -1,77 +1,91 @@
-# MLens 
-Mlens is a simple tool to manage and compare Models and via visualizing the models stats .This is completely free easy to use and run locally on  your computer.
+# MLens
+
+MLens is a lightweight ML experiment tracking tool that helps data scientists 
+log, compare, and visualize their model experiments — all running fully locally 
+on your machine.
 
 ---
 
 ## Why MLens
-In the world of data and data science the main things are models. The engineers run various models and train various example after some time they didn't know which models is perfect and they even didn't on which Managing multiple experiments manually becomes 
-chaotic and time-consuming for data scientists.
-But now using MlensMLens eliminates this problem by automatically 
-tracking and managing all your experiments. so much because Mlens takes all records of this and manage your models quicky.
+
+Managing multiple experiments manually becomes chaotic and time-consuming. 
+After running several models, it becomes difficult to track which model 
+performed best and on which problem. MLens eliminates this problem by 
+automatically recording all your experiments in one place.
+
+## Installation
+
+```bash
+pip install pymlens
+```
+
 ## Run Locally
 
 Clone the project
 
 ```bash
-  git clone https://github.com/munishmalhotra6230/model_tracker-MLENS-.git
+git clone https://github.com/munishmalhotra6230/model_tracker-MLENS-.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd model_tracker-MLENS-
+cd model_tracker-MLENS-
 ```
 
 Install dependencies
 
 ```bash
-  pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 Start the server
 
 ```bash
-    cd backend_monitoring
-    python backend.py 
+cd backend_monitoring
+python backend.py
 ```
-run test scripts
+
+Run test scripts
+
 ```bash
 python test_scripts.py
 ```
-View_results
-``` bash
+
+View results
+
+```bash
 streamlit run dashboard.py
 ```
 
 ## Features
 
-- Easy to use 
-- Runs fully locally
-- Records each experiment and their results 
-- No cloud integrations your data on your system 
-- Provides visualization of each experiment you run on so you can comapare perfromance 
-- uses vanilla metrics 
-- preferable for Supervised learning (Scikit-learn)
+- Easy to use — minimal code changes required
+- Runs fully locally — no cloud, no data leaves your machine
+- Records each experiment and their results automatically
+- Compare model performance visually via dashboard
+- Supports vanilla metrics out of the box
+- Preferable for Supervised Learning (Scikit-learn)
 
+## How to Use MLens
 
+- Start the backend server before running experiments
+- Declare an experiment with a meaningful name based on your problem
+- Run multiple models inside the same experiment
+- View and compare results on the Streamlit dashboard
 
+## Demo
 
+![Demo](<Screen Recording 2026-04-25 211626.gif>)
 
-## How to use Mlens 
+## Screenshots
 
-- You need to add the db_path to store your Experiments
-
-- After this run the server(Always make sure server should be ON)
-- Then Train the model withing declaring a experiment(
-NOTE:Choose Experiment name on the basis of problem you are working on  Like : Problem_Datasetname)
--and after that dasboard command to visualize the experiments 
-# gif
-![alt text](<Screen Recording 2026-04-25 211626.gif>)
-## Screen shots:
-![alt text](<Screenshot 2026-04-25 205636.png>) ![alt text](<Screenshot 2026-04-25 191931.png>) ![alt text](<Screenshot 2026-04-25 205210.png>) ![alt text](<Screenshot 2026-04-25 205516.png>) ![alt text](<Screenshot 2026-04-25 205552.png>) ![alt text](<Screenshot 2026-04-25 205624.png>)
-
-
-
+![alt text](<Screenshot 2026-04-25 205636.png>)
+![alt text](<Screenshot 2026-04-25 191931.png>)
+![alt text](<Screenshot 2026-04-25 205210.png>)
+![alt text](<Screenshot 2026-04-25 205516.png>)
+![alt text](<Screenshot 2026-04-25 205552.png>)
+![alt text](<Screenshot 2026-04-25 205624.png>)
 
 ## Usage/Examples
 
@@ -80,51 +94,42 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
 from Experiment.Experiment import Experiment
-# Load the Iris dataset
-x,y=load_iris(return_X_y=True)
-with Experiment("Experiment1") as exp:
+
+x, y = load_iris(return_X_y=True)
+
+with Experiment("Iris_Classification") as exp:
     try:
-        xtrain,xval,ytrain,yval=train_test_split(x,y,test_size=0.2,random_state=42)
-        exp.Start_experiment(xtrain,ytrain,Xtest=xval,ytest=yval,model=LogisticRegression())
-        exp.Start_experiment(xtrain,ytrain,Xtest=xval,ytest=yval,model=RandomForestClassifier())
-
+        xtrain, xval, ytrain, yval = train_test_split(
+            x, y, test_size=0.2, random_state=42
+        )
+        exp.Start_experiment(
+            xtrain, ytrain, Xtest=xval, ytest=yval,
+            model=LogisticRegression()
+        )
+        exp.Start_experiment(
+            xtrain, ytrain, Xtest=xval, ytest=yval,
+            model=RandomForestClassifier()
+        )
     except Exception as e:
-        print(f"An error occurred:")
+        print(f"An error occurred: {e}")
     finally:
-        print("Experiment Completed")       
-
-with Experiment("Experiment2") as exp:
-    try:
-        xtrain,xval,ytrain,yval=train_test_split(x,y,test_size=0.2,random_state=42)
-        exp.Start_experiment(xtrain,ytrain,Xtest=xval,ytest=yval,model=LogisticRegression())
-        exp.Start_experiment(xtrain,ytrain,Xtest=xval,ytest=yval,model=RandomForestClassifier())
-
-    except Exception as e:
-        print(f"An error occurred:")
-    finally:
-        print("Experiment Completed")   
+        print("Experiment Completed")
 ```
 
-
-
-
-
-
-
 ## Optimizations
-- Suggest Optimizations for mlens on Discord i will listen to it 
 
+Have suggestions? Join the Discord and share your ideas.
 
 ## Feedback
 
-If you have any feedback, please reach out to us on discord here is the link to join Discord channel https://discord.gg/svx4Sfckz
+Join the Discord community:
+https://discord.gg/svx4Sfckz
 
+## Links
 
-## 🔗 Links
 [![portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://munish1234.pythonanywhere.com/)
- 
-## Authors
+
+## Author
 
 - [@Munish Malhotra](https://github.com/munishmalhotra6230)
