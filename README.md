@@ -4,8 +4,10 @@ Mlens is a simple tool to manage and compare Models and via visualizing the mode
 ---
 
 ## Why MLens
-In the world of data and data science the main things are models. The engineers run various models and train various example after some time they didn't know which models is perfect and they even didn't on which problem they are  working its quite frustrating when you are doing this shit . 
-But now using Mlens you will not frustrate so much because Mlens takes all records of this and manage your models quicky.
+In the world of data and data science the main things are models. The engineers run various models and train various example after some time they didn't know which models is perfect and they even didn't on which Managing multiple experiments manually becomes 
+chaotic and time-consuming for data scientists.
+But now using MlensMLens eliminates this problem by automatically 
+tracking and managing all your experiments. so much because Mlens takes all records of this and manage your models quicky.
 ## Run Locally
 
 Clone the project
