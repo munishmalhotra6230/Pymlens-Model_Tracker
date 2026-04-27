@@ -1,4 +1,4 @@
-# MLens
+# MLens (pymlens)
 
 MLens is a lightweight ML experiment tracking tool that helps data scientists
 log, compare, and visualize their model experiments — all running fully locally
@@ -6,7 +6,9 @@ on your machine.
 
 ## Installation
 
+```bash
 pip install pymlens
+```
 
 ---
 
@@ -19,47 +21,11 @@ automatically recording all your experiments in one place.
 
 ---
 
-## Requirements
-
-Before using MLens, make sure these are installed:
-
-pip install flask requests scikit-learn streamlit
-
----
-
-## Run Locally
-
-Clone the project
-
-git clone https://github.com/munishmalhotra6230/model_tracker-MLENS-.git
-
-Go to the project directory
-
-cd model_tracker-MLENS-
-
-Install dependencies
-
-pip install -r requirements.txt
-
-Start the server — IMPORTANT: Server must be running before training
-
-cd backend_monitoring
-python backend.py
-
-Run test scripts
-
-python test_scripts.py
-
-View results on dashboard
-
-streamlit run dashboard.py
-
----
-
 ## Features
 
 - Easy to use — minimal code changes required
 - Runs fully locally — no cloud, no data leaves your machine
+- Server starts automatically — no manual setup needed
 - Records each experiment and their results automatically
 - Compare model performance visually via Streamlit dashboard
 - Supports vanilla metrics out of the box
@@ -67,39 +33,19 @@ streamlit run dashboard.py
 
 ---
 
-## How to Use MLens
+## Requirements
 
-1. Start the backend server first
-2. Declare an experiment with a meaningful name
-3. Run multiple models inside the same experiment
-4. View and compare results on the Streamlit dashboard
+```bash
+pip install pymlens
+```
 
----
-
-## Demo
-
-![Demo](<Screen Recording 2026-04-25 211626.gif>)
-
----
-
-## Screenshots
-
-![Screenshot 1](<Screenshot 2026-04-25 205636.png>)
-![Screenshot 2](<Screenshot 2026-04-25 191931.png>)
-![Screenshot 3](<Screenshot 2026-04-25 205210.png>)
-![Screenshot 4](<Screenshot 2026-04-25 205516.png>)
-![Screenshot 5](<Screenshot 2026-04-25 205552.png>)
-![Screenshot 6](<Screenshot 2026-04-25 205624.png>)
+All dependencies install automatically.
 
 ---
 
 ## Usage/Examples
 
 ```python
-# Step 1 — Start server first in a separate terminal:
-# cd backend_monitoring && python backend.py
-
-# Step 2 — Use in your training code:
 from pymlens import Experiment
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
@@ -128,6 +74,44 @@ with Experiment("Iris_Classification") as exp:
     finally:
         print("Experiment Completed")
 ```
+
+---
+
+## View Dashboard
+
+After running experiments, open the dashboard with one command:
+
+```bash
+python -m pymlens dashboard
+```
+
+Dashboard will open automatically in your browser.
+
+---
+
+## How It Works
+
+1. Import Experiment and declare an experiment name
+2. Run multiple models inside the same experiment block
+3. MLens automatically tracks accuracy and model details
+4. Open dashboard to compare all experiments visually
+
+---
+
+## Demo
+
+![Demo](<Screen Recording 2026-04-25 211626.gif>)
+
+---
+
+## Screenshots
+
+![Screenshot 1](<Screenshot 2026-04-25 205636.png>)
+![Screenshot 2](<Screenshot 2026-04-25 191931.png>)
+![Screenshot 3](<Screenshot 2026-04-25 205210.png>)
+![Screenshot 4](<Screenshot 2026-04-25 205516.png>)
+![Screenshot 5](<Screenshot 2026-04-25 205552.png>)
+![Screenshot 6](<Screenshot 2026-04-25 205624.png>)
 
 ---
 

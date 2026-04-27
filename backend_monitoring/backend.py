@@ -48,7 +48,9 @@ try:
 except:
     pass
 Experiment_db.commit()
-
+@app.route("/")
+def health():
+    return "OK"
 @app.route("/save",methods=['POST'])
 def save():
     data=request.get_json()

@@ -2,12 +2,53 @@ import requests
 from sklearn.metrics import accuracy_score,precision_score,recall_score,f1_score
 from sklearn.model_selection import cross_val_score
 import numpy as np 
+import requests
+import subprocess
+import time
+import os
+import sys
+server="http://127.0.0.1:5000/"
+def _start_server():
+    # Check karo server pehle se chal raha hai
+    try:
+        requests.get(server, timeout=2)
+        return  # already chal raha hai
+    except:
+        pass
+    
+    # Server start karo background mein
+    server_path = os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "backend_monitoring",
+        "backend.py"
+    )
+    server_path = os.path.abspath(server_path)
+    
+    subprocess.Popen(
+        [sys.executable, server_path],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+    
+    # Wait karo server start hone tak
+    for i in range(10):
+        try:
+            requests.get(server, timeout=1)
+            print("Server  start.")
+            return
+        except:
+            time.sleep(1)
+    
+    print("Warning: error starting server")
+
 
 server="http://127.0.0.1:5000/"
 class Experiment():
     def __init__(self,Experiment_name):
         self.Experiment_name=Experiment_name
         self.model=None
+        _start_server()
         self.all_runs=[]
     def __enter__(self):
         print(f"your experiment {self.Experiment_name} is Staring")
