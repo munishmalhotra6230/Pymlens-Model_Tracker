@@ -1,0 +1,157 @@
+Metadata-Version: 2.4
+Name: pymlens
+Version: 1.1.1
+Summary: Lightweight ML experiment tracker — log, compare and visualize your ML experiments locally
+Author: Munish Malhotra
+License: MIT
+Project-URL: Homepage, https://github.com/munishmalhotra6230/model_tracker-MLENS-
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: flask
+Requires-Dist: requests
+Requires-Dist: scikit-learn
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: streamlit
+Requires-Dist: plotly
+Requires-Dist: duckdb
+
+# MLens (pymlens)
+
+MLens is a lightweight ML experiment tracking tool that helps data scientists
+log, compare, and visualize their model experiments — all running fully locally
+on your machine.
+
+## Installation
+
+```bash
+pip install pymlens
+```
+
+---
+
+## Why MLens
+
+Managing multiple experiments manually becomes chaotic and time-consuming.
+After running several models, it becomes difficult to track which model
+performed best and on which problem. MLens eliminates this problem by
+automatically recording all your experiments in one place.
+
+---
+
+## Features
+
+- Easy to use — minimal code changes required
+- Runs fully locally — no cloud, no data leaves your machine
+- Server starts automatically — no manual setup needed
+- Records each experiment and their results automatically
+- Compare model performance visually via Streamlit dashboard
+- Supports vanilla metrics out of the box
+- Preferable for Supervised Learning with Scikit-learn
+
+---
+
+## Requirements
+
+```bash
+pip install pymlens
+```
+
+All dependencies install automatically.
+
+---
+
+## Usage/Examples
+
+```python
+from pymlens import Experiment
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+
+x, y = load_iris(return_X_y=True)
+
+with Experiment("Iris_Classification") as exp:
+    try:
+        xtrain, xval, ytrain, yval = train_test_split(
+            x, y, test_size=0.2, random_state=42
+        )
+        exp.Start_experiment(
+            xtrain, ytrain,
+            Xtest=xval, ytest=yval,
+            model=LogisticRegression()
+        )
+        exp.Start_experiment(
+            xtrain, ytrain,
+            Xtest=xval, ytest=yval,
+            model=RandomForestClassifier()
+        )
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        print("Experiment Completed")
+```
+
+---
+
+## View Dashboard
+
+After running experiments, open the dashboard with one command:
+
+```bash
+python -m pymlens dashboard
+```
+
+Dashboard will open automatically in your browser.
+
+---
+
+## How It Works
+
+1. Import Experiment and declare an experiment name
+2. Run multiple models inside the same experiment block
+3. MLens automatically tracks accuracy and model details
+4. Open dashboard to compare all experiments visually
+
+---
+
+## Demo
+
+![Demo](<Screen Recording 2026-04-25 211626.gif>)
+
+---
+
+## Screenshots
+
+![Screenshot 1](<Screenshot 2026-04-25 205636.png>)
+![Screenshot 2](<Screenshot 2026-04-25 191931.png>)
+![Screenshot 3](<Screenshot 2026-04-25 205210.png>)
+![Screenshot 4](<Screenshot 2026-04-25 205516.png>)
+![Screenshot 5](<Screenshot 2026-04-25 205552.png>)
+![Screenshot 6](<Screenshot 2026-04-25 205624.png>)
+
+---
+
+## Optimizations
+
+Have suggestions? Join the Discord and share your ideas.
+
+---
+
+## Feedback
+
+Join the Discord community:
+https://discord.gg/svx4Sfckz
+
+---
+
+## Links
+
+[![portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://munish1234.pythonanywhere.com/)
+
+---
+
+## Author
+
+- [@Munish Malhotra](https://github.com/munishmalhotra6230)

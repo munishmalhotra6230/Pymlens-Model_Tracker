@@ -1,3 +1,3 @@
-from .Experiment import Experiment
+from .Experiment import Classification_Experiment,Regression_Experiment,Pymlens_settings
 
-__all__ = ["Experiment"]
+__all__ = ["Classification_Experiment","Regression_Experiment","Pymlens_settings"]
