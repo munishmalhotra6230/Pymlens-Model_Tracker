@@ -19,9 +19,9 @@ def get_db():
     return conn
 def _new_db():
     conn=get_db()
-    conn.execute("DELETE FROM Experiments;")
-    conn.execute("DELETE FROM Scores; ")
-    conn.execute("DELETE FROM Regression_Scores;")
+    conn.execute("TRUNCATE TABLE Experiments ;")
+    conn.execute("TRUNCATE TABLE Scores; ")
+    conn.execute("TRUNCATE TABLE Regression_Scores;")
     conn.commit()
     conn.close()
 def init_db():
@@ -49,11 +49,6 @@ def init_db():
             Params TEXT
         )
     """)
-#     conn.execute("""
-# ALTER TABLE Scores ADD confusion_matrix Text NULL;
-# """)
-def _inti_reg():  
-    conn=get_db()  
     conn.execute("""
         CREATE TABLE IF NOT EXISTS Experiments (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,9 +69,11 @@ def _inti_reg():
                 Params TEXT
             )
         """)
-        
     conn.commit()
     conn.close()
+#     conn.execute("""
+# ALTER TABLE Scores ADD confusion_matrix Text NULL;
+# """)
 
 
 class Classification_Experiment():
@@ -179,7 +176,7 @@ class Regression_Experiment():
         self.ytrain = ytrain
         self.Xtest = Xtest
         self.ytest = ytest
-        _inti_reg()
+        init_db()
 
     def __enter__(self):
         print(f"Experiment running: {self.Experiment_name}")
