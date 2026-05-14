@@ -39,7 +39,9 @@ def init_db():
         CREATE TABLE IF NOT EXISTS Scores (
             Score_ID INTEGER PRIMARY KEY AUTOINCREMENT,
             Experiment_ID INTEGER,
+            train_acc REAL,
             Model TEXT,
+            Key_word TEXT,
             Accuracy REAL,
             Precision REAL,
             Recall REAL,
@@ -50,17 +52,11 @@ def init_db():
         )
     """)
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS Experiments (
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Experiment_name TEXT,
-            timestamp TEXT
-        )
-    """)
-    conn.execute("""
             CREATE TABLE IF NOT EXISTS Regression_Scores (
                 Score_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Experiment_ID INTEGER,
                 Model TEXT,
+                Key_word TEXT,
                 MSE REAL,
                 MAE REAL,
                 R2 REAL,
@@ -77,7 +73,7 @@ def init_db():
 
 
 class Classification_Experiment():
-    def __init__(self, Experiment_name, xtrain, ytrain, Xtest, ytest):
+    def __init__(self, Experiment_name, xtrain, ytrain, Xtest, ytest,):
         self.Experiment_name = Experiment_name
         self.all_runs = []
         self.xtrain = xtrain
@@ -119,11 +115,13 @@ class Classification_Experiment():
 )
             conn.execute("""
                 INSERT INTO Scores 
-                (Experiment_ID, Model, Accuracy, Precision, Recall, F1_Score, cross_val_score, confusion_matrix, Params)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (Experiment_ID,train_acc, Model, Key_word,Accuracy, Precision, Recall, F1_Score, cross_val_score, confusion_matrix, Params)
+                VALUES (?, ?,?, ?,?, ?, ?, ?, ?, ?, ?)
             """, (
                 exp_id,
+                scores.get('train_acc'),
                 run['Model'],
+                run['Key_word'],
                 scores.get('accuracy'),
                 scores.get('precision'),
                 scores.get('recall'),
@@ -138,8 +136,13 @@ class Classification_Experiment():
         conn.close()
         print(f"Experiment khatam: {self.Experiment_name}")
 
-    def Start_experiment(self, model=None, cross_val=False):
+    def Start_experiment(self, model=None,exp_keyword=None, cross_val=True):
         self.model = model
+        if exp_keyword is None:
+            exp_keyword = model.__class__.__name__
+        else:
+            self.Exp_keyword = exp_keyword    
+        
         print(f"Running: {model.__class__.__name__}")
 
         if cross_val:
@@ -150,6 +153,8 @@ class Classification_Experiment():
         self.model.fit(self.xtrain, self.ytrain)
         ypred = self.model.predict(self.xtest)
         cm = confusion_matrix(self.ytest, ypred).tolist()
+        self.train_acc = accuracy_score(self.ytrain, self.model.predict(self.xtrain))
+        print(" Prediction done, calculating scores...")
 
         scores = {
             'accuracy': accuracy_score(self.ytest, ypred),
@@ -157,12 +162,14 @@ class Classification_Experiment():
             'recall': recall_score(self.ytest, ypred, average="weighted"),
             'f1_score': f1_score(self.ytest, ypred, average="weighted"),
             'cross_val_score': cv_score,
+            'train_acc': self.train_acc,
             'confusion_matrix': json.dumps(cm),
             'params': self.model.get_params()
         }
 
         self.all_runs.append({
             'Model': self.model.__class__.__name__,
+            'Key_word': exp_keyword,
             'Scores': scores
         })
         print(f"{model.__class__.__name__}: Accuracy = {scores['accuracy']:.4f}")
@@ -211,11 +218,12 @@ class Regression_Experiment():
             )
             conn.execute("""
                 INSERT INTO Regression_Scores
-                (Experiment_ID, Model, MSE, MAE, R2, RMSE, cv_score, Params)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (Experiment_ID, Model,Key_word, MSE, MAE, R2, RMSE, cv_score, Params)
+                VALUES (?, ?, ?,?, ?, ?, ?, ?, ?)
             """, (
                 exp_id,
                 run['Model'],
+                run['Key_word'],
                 scores.get('mse'),
                 scores.get('mae'),
                 scores.get('r2'),
@@ -229,8 +237,12 @@ class Regression_Experiment():
         conn.close()
         print(f"Experiment done: {self.Experiment_name}")
 
-    def Start_experiment(self, model=None, cross_val=False):
+    def Start_experiment(self, model=None,exp_keyword=None, cross_val=False):
         self.model = model
+        if exp_keyword is None:
+            exp_keyword = model.__class__.__name__
+        else:
+            self.Exp_keyword = exp_keyword    
         print(f"Running: {model.__class__.__name__}")
 
         if cross_val:
@@ -256,6 +268,7 @@ class Regression_Experiment():
 
         self.all_runs.append({
             'Model': self.model.__class__.__name__,
+            'Key_word':self.Exp_keyword,
             'Scores': scores
         })
         print(f"{model.__class__.__name__}: R2 = {scores['r2']:.4f}")
@@ -280,4 +293,11 @@ class Pymlens_settings():
                 print(" the existing db is deleted") 
             else: raise("MISMATCH ERROR")     
         else: return None             
-     
+# if __name__ == "__main__":
+#     con=  get_db()
+#     con.execute("DROP TABLE Experiments;")
+#     con.execute("DROP TABLE Scores;")
+#     con.execute("DROP TABLE Regression_Scores;")
+#     con.commit()
+#     con.close()
+
