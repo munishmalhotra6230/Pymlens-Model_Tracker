@@ -1,6 +1,12 @@
 # PyMLens 🧪
 
-A lightweight ML experiment tracking tool that helps data scientists log, compare, and visualize their model experiments — runs fully locally on your machine.
+> A lightweight ML experiment tracking tool that helps data scientists log, compare, and visualize their model experiments — runs **fully locally** on your machine, no cloud required.
+
+[![PyPI version](https://img.shields.io/pypi/v/pymlens?color=blue&style=flat-square)](https://pypi.org/project/pymlens/)
+[![Python](https://img.shields.io/badge/python-%3E%3D3.8-blue?style=flat-square)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+
+---
 
 ## Installation
 
@@ -10,66 +16,73 @@ pip install pymlens
 
 ---
 
-## Why PyMLens
+## Why PyMLens?
 
-Managing multiple experiments manually becomes chaotic and time-consuming. After running several models, it becomes difficult to track which model performed best and on which problem. PyMLens eliminates this problem by automatically recording all your experiments in one place.
+Managing multiple experiments manually becomes chaotic and time-consuming. After running several models, it becomes difficult to track which model performed best and on which problem. PyMLens eliminates this by **automatically recording all your experiments** in a local SQLite database and giving you a rich Streamlit dashboard to explore results.
 
 ---
 
 ## Features
 
-- Easy to use — minimal code changes required
-- Runs fully locally — no cloud, no data leaves your machine
-- Supports both Classification and Regression problems
-- Records each experiment and results automatically
-- Compare model performance visually via Streamlit dashboard
-- Confusion matrix tracking for classification
-- MSE, MAE, RMSE, R2 tracking for regression
-- Cross validation score tracking
-- Copy model hyperparameters directly from dashboard
-- Interactive Sunburst visualization for experiment exploration
-- Dynamic themes — randomize dashboard appearance
+- ✅ **Minimal code changes** — wrap your existing training code in a `with` block
+- 🔒 **Fully local** — data stored in `~/.pymlens/experiments.db` (SQLite), nothing leaves your machine
+- 📊 **Classification & Regression** support
+- 🏷️ **Custom experiment keywords** — label individual runs with `exp_keyword`
+- 📈 **Train accuracy tracking** — detects overfitting by comparing train vs. validation scores
+- 🧮 **Confusion matrix** — stored and visualized per model for classification
+- 🔁 **Cross-validation** — enabled by default for classification, optional for regression
+- 🧬 **AI DNA Report** — powered by Groq (LLaMA 3.1), gives per-model analysis with a best-model verdict
+- 🌈 **Dynamic themes** — randomize the full dashboard appearance on demand
+- 📋 **Copy hyperparameters** — inspect and copy any model's params directly from the dashboard
+- 🌀 **Interactive Sunburst explorer** — drill down from experiment → model → metric
 
 ---
 
 ## Supported Metrics
 
 ### Classification
-- Accuracy
-- Precision
-- Recall
-- F1 Score
-- Cross Validation Score
-- Confusion Matrix
+| Metric | Description |
+|---|---|
+| Accuracy | Validation accuracy |
+| Train Accuracy | Training accuracy (overfitting check) |
+| Precision | Weighted precision |
+| Recall | Weighted recall |
+| F1 Score | Weighted F1 |
+| Cross Validation Score | Mean CV score (3-fold, enabled by default) |
+| Confusion Matrix | Stored as JSON, visualized as heatmap |
 
 ### Regression
-- MSE (Mean Squared Error)
-- MAE (Mean Absolute Error)
-- RMSE (Root Mean Squared Error)
-- R2 Score
-- Cross Validation Score
+| Metric | Description |
+|---|---|
+| MSE | Mean Squared Error |
+| MAE | Mean Absolute Error |
+| RMSE | Root Mean Squared Error |
+| R2 | R² Score |
+| Cross Validation Score | Mean CV score using `neg_mean_squared_error` (opt-in) |
 
 ---
 
 ## Run Locally
 
-Clone the project
+Clone the project:
 
 ```bash
 git clone https://github.com/munishmalhotra6230/model_tracker-MLENS-.git
 cd model_tracker-MLENS-
 ```
 
-Install dependencies
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run dashboard
+Run the dashboard:
 
 ```bash
 python -m pymlens dashboard
+# or
+pymlens dashboard
 ```
 
 ---
@@ -88,10 +101,12 @@ x, y = load_iris(return_X_y=True)
 xtrain, xval, ytrain, yval = train_test_split(x, y, test_size=0.2, random_state=42)
 
 with Classification_Experiment("Iris_Classification", xtrain, ytrain, xval, yval) as exp:
-    exp.Start_experiment(model=LogisticRegression())
-    exp.Start_experiment(model=RandomForestClassifier())
-    exp.Start_experiment(model=SVC())
+    exp.Start_experiment(model=LogisticRegression(), exp_keyword="Logistic_reg", cross_val=True)
+    exp.Start_experiment(model=RandomForestClassifier(), exp_keyword="RF_baseline", cross_val=True)
+    exp.Start_experiment(model=SVC(), exp_keyword="SVM_rbf", cross_val=True)
 ```
+
+> **Note:** `cross_val=True` is the default for classification. Set `cross_val=False` to skip cross-validation and speed up training.
 
 ---
 
@@ -108,56 +123,142 @@ x, y = fetch_california_housing(return_X_y=True)
 xtrain, xval, ytrain, yval = train_test_split(x, y, test_size=0.2, random_state=42)
 
 with Regression_Experiment("House_Price", xtrain, ytrain, xval, yval) as exp:
-    exp.Start_experiment(model=LinearRegression())
-    exp.Start_experiment(model=RandomForestRegressor())
-    exp.Start_experiment(model=GradientBoostingRegressor())
+    exp.Start_experiment(model=LinearRegression(), exp_keyword="Linear_baseline")
+    exp.Start_experiment(model=RandomForestRegressor(), exp_keyword="RF_regressor", cross_val=True)
+    exp.Start_experiment(model=GradientBoostingRegressor(), exp_keyword="GBR_v1", cross_val=True)
 ```
+
+> **Note:** `cross_val=False` is the default for regression (uses `neg_mean_squared_error` scoring when enabled).
 
 ---
 
-## View Dashboard
+## `Start_experiment` Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `model` | sklearn estimator | required | Any scikit-learn compatible model |
+| `exp_keyword` | `str` | `None` | Custom label for this run (falls back to class name) |
+| `cross_val` | `bool` | `True` (Classification) / `False` (Regression) | Enable/disable 3-fold cross-validation |
+
+---
+
+## How Data Is Stored
+
+All results are persisted in a local **SQLite database** at:
+
+```
+~/.pymlens/experiments.db
+```
+
+Three tables are used:
+
+- **`Experiments`** — experiment name + timestamp
+- **`Scores`** — classification results per model (accuracy, precision, recall, F1, CV score, confusion matrix, params)
+- **`Regression_Scores`** — regression results per model (MSE, MAE, R2, RMSE, CV score, params)
+
+Re-running an experiment with the same name **replaces** existing results for that model (upsert behavior).
+
+---
+
+## Dashboard Pages
+
+Launch with:
 
 ```bash
-python -m pymlens dashboard
+pymlens dashboard
 ```
 
-Dashboard opens automatically in your browser with:
-- Model leaderboard
-- Metric comparison charts
-- Radar view
-- Precision vs Recall scatter (Classification)
-- MSE vs MAE scatter (Regression)
-- Cross validation stability
-- Copy model hyperparameters
-- Interactive Sunburst explorer
+The dashboard has **3 pages**:
+
+### 1. 📊 Model Comparison
+- Leaderboard table sorted by F1 Score (classification) or R² (regression)
+- Grouped bar chart comparing all metrics across models
+- Radar (spider) chart for multi-metric comparison
+- Precision vs. Recall scatter plot (classification) / MSE vs. MAE scatter (regression)
+- Cross-validation stability bar chart
+- Interactive confusion matrix heatmap (classification)
+- Copy model hyperparameters as JSON
+
+### 2. 🌀 Infographics — Sunburst Explorer
+- Drill-down from **All Experiments → Experiment → Model → Metric**
+- Hover to see all metric values per model
+- Supports both classification and regression data
+
+### 3. 🧬 Critics — AI DNA Report *(Groq-powered)*
+- Sends model metrics to **LLaMA 3.1 (8B)** via Groq API
+- Generates a structured per-model report:
+  - Score interpretation, overfitting analysis, CV stability
+  - One specific improvement recommendation per model
+  - Final **VERDICT** — best model with justification
+- Requires a Groq API key (see setup below)
 
 ---
 
-## Demo
+## AI DNA Report Setup
+
+The **Critics** page requires a free [Groq API key](https://console.groq.com/).
+
+Save it using the built-in settings utility:
+
+```python
+from pymlens import Pymlens_settings
+
+settings = Pymlens_settings()
+settings.add_api_key()   # prompts you to paste your Groq key
+```
+
+This saves your key to `pymlens/.streamlit/secrets.toml` so the dashboard can load it securely.
+
+---
+
+## Managing Your Database
+
+Use `Pymlens_settings` to manage stored data:
+
+```python
+from pymlens import Pymlens_settings
+
+settings = Pymlens_settings()
+settings.delete_db()   # interactive confirmation + 6-digit code required
+```
+
+> ⚠️ `delete_db()` clears **all experiments** from the database. A random 6-digit confirmation code is required to prevent accidental deletion.
 
 ---
 
 ## Screenshots
-![alt text](<Screenshot 2026-05-12 175014.png>) ![alt text](<Screenshot 2026-05-12 175105.png>) ![alt text](<Screenshot 2026-05-12 174956.png>)
+
+![Model Comparison Dashboard](<Screenshot 2026-05-12 175014.png>)
+![Sunburst Infographics Explorer](<Screenshot 2026-05-12 175105.png>)
+![Leaderboard View](<Screenshot 2026-05-12 174956.png>)
 
 ---
 
-## Optimizations
+## Dependencies
 
-Have suggestions? Join the Discord and share your ideas.
+| Package | Purpose |
+|---|---|
+| `scikit-learn` | Model training & metric computation |
+| `numpy` | Numerical operations |
+| `pandas` | Data manipulation |
+| `streamlit` | Dashboard UI |
+| `plotly` | Interactive charts |
+| `groq` | AI DNA Report via LLaMA 3.1 |
+| `sqlite3` | Local experiment storage (stdlib) |
 
 ---
 
-## Feedback
+## Feedback & Community
 
-Join the Discord community:
-https://discord.gg/svx4Sfckz
+Have suggestions or found a bug? Join the Discord:
+
+🔗 [discord.gg/svx4Sfckz](https://discord.gg/svx4Sfckz)
 
 ---
 
 ## Links
 
-[![portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://munish1234.pythonanywhere.com/)
+[![Portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://munish1234.pythonanywhere.com/)
 
 ---
 
