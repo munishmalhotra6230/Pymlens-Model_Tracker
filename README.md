@@ -87,6 +87,77 @@ pymlens dashboard
 
 ---
 
+## 🐳 Docker
+
+### Build the image
+
+```bash
+docker build -t pymlens .
+```
+
+### Run the dashboard
+
+```bash
+docker run -p 8501:8501 \
+  -v pymlens_data:/root/.pymlens \
+  -e GROQ_API_KEY=your_groq_api_key_here \
+  pymlens
+```
+
+Then open **http://localhost:8501** in your browser.
+
+| Flag | Purpose |
+|---|---|
+| `-p 8501:8501` | Maps container port to your machine |
+| `-v pymlens_data:/root/.pymlens` | Persists your experiment DB across restarts |
+| `-e GROQ_API_KEY=...` | Passes your Groq key securely (for Critics page) |
+
+> Leave out `-e GROQ_API_KEY` if you don't need the AI Critics page.
+
+### Using docker-compose (recommended)
+
+Create a `docker-compose.yml` in your project:
+
+```yaml
+services:
+  pymlens:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      - pymlens_data:/root/.pymlens
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+
+volumes:
+  pymlens_data:
+```
+
+Then run:
+
+```bash
+# Start
+docker compose up
+
+# Start in background
+docker compose up -d
+
+# Stop
+docker compose down
+```
+
+Pass your key without hardcoding it:
+
+```bash
+# Windows PowerShell
+$env:GROQ_API_KEY="your_key_here"; docker compose up
+
+# Linux / Mac
+GROQ_API_KEY="your_key_here" docker compose up
+```
+
+---
+
 ## Usage — Classification
 
 ```python
