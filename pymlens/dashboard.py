@@ -138,199 +138,6 @@ df_reg = load_regression_data()
 st.title("🚀 ML Decision Dashboard")
 
 
-def _classification_report(series):
-    # series: a pandas Series with metric fields
-    lines = []
-    name = series.get("Display_Name", "Model")
-    lines.append(f"### {name} — Model DNA Report")
-
-    train = series.get("Train_Score", np.nan)
-    test_acc = series.get("Accuracy", np.nan)
-    prec = series.get("Precision", np.nan)
-    rec = series.get("Recall", np.nan)
-    f1 = series.get("F1_Score", np.nan)
-    cv = series.get("cross_val_score", np.nan)
-
-    # Summary
-    summary = []
-    if not pd.isna(f1):
-        summary.append(f"F1: {f1:.3f}")
-    if not pd.isna(prec) and not pd.isna(rec):
-        summary.append(f"Precision/Recall: {prec:.3f}/{rec:.3f}")
-    if not pd.isna(test_acc):
-        summary.append(f"Test accuracy: {test_acc:.3f}")
-    if not pd.isna(train):
-        summary.append(f"Train score: {train:.3f}")
-    if not pd.isna(cv):
-        summary.append(f"Cross-val (avg): {cv:.3f}")
-
-    lines.append("**Summary metrics:** " + ", ".join(summary))
-
-    # Strengths / weaknesses
-    strengths = []
-    weaknesses = []
-
-    if not pd.isna(f1) and f1 > 0.85:
-        strengths.append("Strong overall balance between precision and recall (high F1)")
-    else:
-        weaknesses.append("F1 is moderate/low — model may struggle on overall class balance")
-
-    if not pd.isna(prec) and not pd.isna(rec):
-        if prec > 0.85 and rec > 0.85:
-            strengths.append("High precision and high recall — suitable for general use")
-        elif prec > 0.85 and rec < 0.6:
-            weaknesses.append("High precision but low recall — good when false positives are costly, but misses positives")
-        elif rec > 0.85 and prec < 0.6:
-            weaknesses.append("High recall but low precision — good when missing positives is costly, but many false alarms")
-
-    # Confusion matrix analysis
-    try:
-        cm = series.get("confusion_matrix")
-        if cm is not None:
-            mtx = np.array(cm)
-            row_sums = mtx.sum(axis=1) + 1e-9
-            diag = np.diag(mtx)
-            recalls = diag / row_sums
-            low = list(np.where(recalls < 0.5)[0])
-            if len(low) > 0:
-                weaknesses.append(f"Some classes have low recall (indices): {low}")
-            if np.max(row_sums) / (np.min(row_sums) + 1e-9) > 3:
-                weaknesses.append("Significant class imbalance detected")
-    except Exception:
-        pass
-
-    # Overfitting/underfitting
-    if not pd.isna(train) and not pd.isna(test_acc):
-        diff = train - test_acc
-        if diff > 0.10:
-            weaknesses.append("Likely overfitting: train >> test")
-        elif diff < -0.05:
-            weaknesses.append("Possible underfitting or data mismatch: test > train")
-        else:
-            strengths.append("Training and test performance are comparable (no obvious overfitting)")
-
-    # Stability
-    if not pd.isna(cv):
-        if cv < 0.6:
-            weaknesses.append("Low cross-validation stability — results may be brittle")
-        elif cv < 0.8:
-            strengths.append("Moderate cross-validation stability")
-        else:
-            strengths.append("Stable across folds (good CV score)")
-
-    lines.append("**Strengths:**")
-    if strengths:
-        for s in strengths:
-            lines.append(f"- {s}")
-    else:
-        lines.append("- (none detected)")
-
-    lines.append("**Weaknesses / Risks:**")
-    if weaknesses:
-        for w in weaknesses:
-            lines.append(f"- {w}")
-    else:
-        lines.append("- (none detected)")
-
-    # Recommendation
-    recs = []
-    if weaknesses and any("overfit" in w.lower() or "imbalance" in w.lower() for w in weaknesses):
-        recs.append("Consider more data, regularization, class-weighting or resampling.")
-    if weaknesses and any("low" in w.lower() and "cv" in w.lower() for w in weaknesses):
-        recs.append("Run more robust cross-validation and investigate feature stability.")
-    if not weaknesses and (f1 > 0.8 if not pd.isna(f1) else False):
-        recs.append("Model appears production-ready for similar data and use-cases.")
-    if not recs:
-        recs.append("Collect more validation data and iterate on model tuning before production.")
-
-    lines.append("**Recommendations:**")
-    for r in recs:
-        lines.append(f"- {r}")
-
-    return "\n\n".join(lines)
-
-
-def _regression_report(series):
-    lines = []
-    name = series.get("Display_Name", "Model")
-    lines.append(f"### {name} — Model DNA Report")
-
-    train = series.get("Train_Score", np.nan)
-    r2 = series.get("R2", np.nan)
-    mse = series.get("MSE", np.nan)
-    mae = series.get("MAE", np.nan)
-    rmse = series.get("RMSE", np.nan)
-    cv = series.get("cv_score", np.nan)
-
-    summary = []
-    if not pd.isna(r2):
-        summary.append(f"R2: {r2:.3f}")
-    if not pd.isna(mse):
-        summary.append(f"MSE: {mse:.3f}")
-    if not pd.isna(mae):
-        summary.append(f"MAE: {mae:.3f}")
-    if not pd.isna(train):
-        summary.append(f"Train score: {train:.3f}")
-    if not pd.isna(cv):
-        summary.append(f"CV (neg MSE avg): {cv:.3f}")
-
-    lines.append("**Summary metrics:** " + ", ".join(summary))
-
-    strengths = []
-    weaknesses = []
-
-    if not pd.isna(r2):
-        if r2 > 0.75:
-            strengths.append("High R2 — explains a large portion of variance")
-        elif r2 < 0.3:
-            weaknesses.append("Low R2 — model explains little of the variance")
-        else:
-            strengths.append("Moderate R2")
-
-    if not pd.isna(mse) and not pd.isna(mae):
-        strengths.append("Error metrics available for diagnostic comparison")
-
-    if not pd.isna(train) and not pd.isna(r2):
-        diff = train - r2
-        if diff > 0.10:
-            weaknesses.append("Likely overfitting: training >> test")
-        elif r2 - train > 0.10:
-            weaknesses.append("Possible data leakage or mismatch: test > train")
-        else:
-            strengths.append("Training and test performance are comparable")
-
-    if not pd.isna(cv):
-        if cv < -1.0:
-            weaknesses.append("Poor cross-validation (very negative score) — unstable")
-        else:
-            strengths.append("Cross-validation results available")
-
-    lines.append("**Strengths:**")
-    if strengths:
-        for s in strengths:
-            lines.append(f"- {s}")
-    else:
-        lines.append("- (none detected)")
-
-    lines.append("**Weaknesses / Risks:**")
-    if weaknesses:
-        for w in weaknesses:
-            lines.append(f"- {w}")
-    else:
-        lines.append("- (none detected)")
-
-    recs = []
-    if weaknesses:
-        recs.append("Consider feature engineering, regularization, or more training data.")
-    else:
-        recs.append("Model is promising; validate on holdout and run stress tests before production.")
-
-    lines.append("**Recommendations:**")
-    for r in recs:
-        lines.append(f"- {r}")
-
-    return "\n\n".join(lines)
-
 # =========================
 # NAVIGATION
 # =========================
@@ -543,160 +350,32 @@ elif page == "Infographics":
         )
         st.plotly_chart(fig, use_container_width=True)
 elif page=="Critics":
-    st.header("Models Criticism and Feedback")
-    st.markdown("This features allows user to give a analysis about each experiment using metrics")
-    problem=st.selectbox("Select problem type",["Classification","Regression"]) 
-    # choose experiment list depending on problem
-    experiments = df["Experiment_name"].unique() if problem=="Classification" else df_reg["Experiment_name"].unique()
-    selected_exp = st.selectbox("Select Experiment to Critic", experiments)
+    from ai_approach import generate_dna_report
+    api_key=st.secrets['MY_API_KEY']
+    st.header("🧬 Model DNA Report Generator")
+    select_problem_crit = st.selectbox("Select Problem Type", ["Classification", "Regression"])
+    if select_problem_crit == "Classification":
+        data_crit = df
+        experiments_crit=st.selectbox("Select Experiment",data_crit["Experiment_name"].unique())
+        data_crit=data_crit[data_crit["Experiment_name"]==experiments_crit]
+        metrics=data_crit[["Model","Accuracy","F1_Score","Precision","Recall","cross_val_score","Train_Score"]]
+        response=generate_dna_report(metrics,api_key,"Classification",experiments_crit)
+        st.subheader("🧬 DNA Report")
+        st.markdown(response)
 
-    if problem=="Classification":
-        df_exp = df[df["Experiment_name"]==selected_exp]
-        st.subheader(f"Models Trained {len(df_exp['Model'])}")
-        selected_model = st.selectbox("Select model to critic", df_exp["Display_Name"].unique())
-        key_frame = df_exp[df_exp["Display_Name"]==selected_model]
-        if key_frame.empty:
-            st.error("No data available for selected model.")
-        else:
-            cv = key_frame["cross_val_score"].values[0]
-            if cv == 0 or pd.isna(cv):
-                st.warning("This model was not cross validated, consider running it with cross validation for better insights")
-            else:
-                if cv < 0.75:
-                    st.error("This model has lower cross val score")
-                elif cv < 0.85:
-                    st.warning("This model has decent cross val score but can be improved")
-                elif cv < 0.95:
-                    st.success("This model has good cross val score")
-                elif cv <= 1:
-                    st.success("This model has excellent cross val score")
-                else:
-                    st.error("This model has invalid cross val score")
+    else:
+        # Mirror the classification critics flow for regression
+        data_crit = df_reg
+        experiments_crit = st.selectbox("Select Experiment", data_crit["Experiment_name"].unique())
+        data_crit = data_crit[data_crit["Experiment_name"] == experiments_crit]
+        # Select regression-relevant metrics
+        metrics = data_crit[["Model", "MSE", "MAE", "R2", "RMSE", "cv_score", "Train_Score"]]
+        response = generate_dna_report(metrics, api_key, "Regression", experiments_crit)
+        st.subheader("🧬 DNA Report")
+        st.markdown(response)
 
-            f1 = key_frame["F1_Score"].values[0]
-            if f1 > 0.85:
-                st.success("This model has good F1 score")
-            else:
-                st.warning("There may be class imbalance or the model needs improvement")
 
-            prec = key_frame["Precision"].values[0]
-            rec = key_frame["Recall"].values[0]
-            if prec > 0.85 and rec > 0.85:
-                st.success("This model has good precision and recall")
-            elif prec > 0.85 and rec < 0.52:
-                st.markdown("⚠ High false negatives detected — model misses many actual positive cases")
-            elif prec < 0.85 and rec > 0.85:
-                st.markdown("⚠ High false positives detected — model incorrectly labeling many negative cases as positive")
-            # Training vs test analysis
-            try:
-                train_score = key_frame["Train_Score"].values[0]
-            except Exception:
-                train_score = float("nan")
 
-            test_acc = key_frame["Accuracy"].values[0] if "Accuracy" in key_frame else None
-            overview = []
-            overview.append(f"**Model:** {selected_model}")
-            if not pd.isna(train_score):
-                overview.append(f"Training score: {train_score:.4f}")
-            if test_acc is not None:
-                overview.append(f"Test accuracy: {test_acc:.4f}")
-
-            # Overfitting / underfitting heuristics
-            if not pd.isna(train_score) and test_acc is not None:
-                diff = train_score - test_acc
-                if diff > 0.10:
-                    overview.append("⚠ Likely overfitting: training score significantly higher than test score")
-                elif diff < -0.05:
-                    overview.append("⚠ Possible underfitting or data mismatch: test score higher than training score")
-                else:
-                    overview.append("✅ Training and test scores are comparable")
-
-            # Confusion matrix inspection
-            try:
-                cm_val = key_frame["confusion_matrix"].values[0]
-                if cm_val is not None:
-                    mtx = np.array(cm_val)
-                    row_sums = mtx.sum(axis=1)
-                    diag = np.diag(mtx)
-                    recalls = diag / (row_sums + 1e-9)
-                    low_recall_classes = np.where(recalls < 0.5)[0]
-                    if len(low_recall_classes) > 0:
-                        overview.append(f"⚠ Some classes have low recall: {list(map(int, low_recall_classes))}")
-                    # class imbalance heuristic
-                    if np.max(row_sums) / (np.min(row_sums) + 1e-9) > 3:
-                        overview.append("⚠ Significant class imbalance detected — consider resampling or class-weighting")
-            except Exception:
-                pass
-
-            report = _classification_report(key_frame.iloc[0])
-            st.markdown(report, unsafe_allow_html=False)
-
-    else:  # Regression critic
-        df_exp = df_reg[df_reg["Experiment_name"]==selected_exp]
-        st.subheader(f"Models Trained {len(df_exp['Model'])}")
-        selected_model = st.selectbox("Select model to critic", df_exp["Display_Name"].unique())
-        row = df_exp[df_exp["Display_Name"]==selected_model]
-        if row.empty:
-            st.error("No data available for selected model.")
-        else:
-            r2 = row["R2"].values[0]
-            mse = row["MSE"].values[0]
-            rmse = row["RMSE"].values[0] if "RMSE" in row else (mse ** 0.5 if mse is not None else None)
-            cv = row.get("cv_score") if "cv_score" in row else None
-
-            # R2 based guidance
-            if pd.isna(r2):
-                st.warning("R2 not available for this run.")
-            elif r2 < 0:
-                st.error("Model performs worse than a horizontal mean predictor (R2 < 0). Consider feature engineering or different algorithms.")
-            elif r2 < 0.5:
-                st.warning("Low R2 — the model explains little variance.")
-            elif r2 < 0.75:
-                st.info("Moderate R2 — acceptable but can be improved.")
-            elif r2 <= 1:
-                st.success("Good R2 — model explains a large portion of variance.")
-            else:
-                st.error("Invalid R2 value")
-
-            # Basic error insights
-            st.write(f"MSE: {mse:.4f}" if mse is not None else "MSE: N/A")
-            if rmse is not None:
-                st.write(f"RMSE: {rmse:.4f}")
-
-            # CV score note
-            try:
-                cv_val = row["cv_score"].values[0]
-                if cv_val == 0 or pd.isna(cv_val):
-                    st.warning("This model was not cross validated, consider running cross validation for robust error estimates")
-                else:
-                    st.info(f"Cross-validation score (neg MSE): {cv_val:.4f}")
-            except Exception:
-                pass
-            # Training vs test analysis for regression
-            try:
-                train_score = row["Train_Score"].values[0]
-            except Exception:
-                train_score = float("nan")
-
-            overview = []
-            overview.append(f"**Model:** {selected_model}")
-            if not pd.isna(train_score):
-                overview.append(f"Training score: {train_score:.4f}")
-            if not pd.isna(r2):
-                overview.append(f"Test R2: {r2:.4f}")
-
-            if not pd.isna(train_score) and not pd.isna(r2):
-                if train_score - r2 > 0.10:
-                    overview.append("⚠ Likely overfitting: training R2 significantly higher than test R2")
-                elif r2 - train_score > 0.10:
-                    overview.append("⚠ Possible data leakage or mismatch: test R2 higher than training R2")
-                else:
-                    overview.append("✅ Training and test R2 are comparable")
-
-            report = _regression_report(row.iloc[0])
-            st.markdown(report, unsafe_allow_html=False)
-                    
-    
 
 
 

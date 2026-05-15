@@ -292,12 +292,25 @@ class Pymlens_settings():
                 _new_db()
                 print(" the existing db is deleted") 
             else: raise("MISMATCH ERROR")     
-        else: return None             
-# if __name__ == "__main__":
-#     con=  get_db()
-#     con.execute("DROP TABLE Experiments;")
-#     con.execute("DROP TABLE Scores;")
-#     con.execute("DROP TABLE Regression_Scores;")
-#     con.commit()
-#     con.close()
+        else: return None
+    def add_api_key(self):
+        path=r"pymlens\.streamlit"
+        if not os.path.exists(path):
+            os.makedirs(path)
+        else: pass
+        apikey=input("Enter your Groq API key: ")
+        with open(os.path.join(path,"secrets.toml"), "w") as f:
+            f.write(f"MY_API_KEY = '{apikey}'")
+        print("API key saved successfully.")
+        return None
+      
+            
 
+
+        
+
+#GROQ_API_KEY_REMOVED
+if __name__ == "__main__":
+    con=  get_db()
+    seetings=Pymlens_settings()
+    seetings.add_api_key()

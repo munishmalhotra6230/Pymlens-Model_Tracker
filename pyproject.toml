@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pymlens"
-version = "1.1.2"
+version = "1.1.5"
 description = "Lightweight ML experiment tracker — log, compare and visualize your ML experiments locally"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -13,14 +13,13 @@ authors = [
     {name = "Munish Malhotra"}
 ]
 dependencies = [
-    "flask",
     "requests",
     "scikit-learn",
     "numpy",
     "pandas",
     "streamlit",
-    "plotly",
-    "duckdb"
+    "groq",
+    "plotly"
 ]
 
 [project.scripts]
