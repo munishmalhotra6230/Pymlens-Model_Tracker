@@ -21,6 +21,7 @@ pip install pymlens
 Managing multiple experiments manually becomes chaotic and time-consuming. After running several models, it becomes difficult to track which model performed best and on which problem. PyMLens eliminates this by **automatically recording all your experiments** in a local SQLite database and giving you a rich Streamlit dashboard to explore results.
 
 ---
+# documentation :https://pymlens.netlify.app/
 
 ## Features
 
