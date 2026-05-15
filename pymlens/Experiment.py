@@ -307,10 +307,8 @@ class Pymlens_settings():
             
 
 
-        
 
-# API key removed — use Pymlens_settings().add_api_key() to configure your Groq key securely
-if __name__ == "__main__":
-    con=  get_db()
-    seetings=Pymlens_settings()
-    seetings.add_api_key()
+# if __name__ == "__main__":
+#     con=  get_db()
+#     seetings=Pymlens_settings()
+#     seetings.add_api_key()
