@@ -1,4 +1,4 @@
-
-.dist/
-.pymlens.egg-info/
+.streamlit/secrets.toml
+dist/
+pymlens.egg-info/
 
