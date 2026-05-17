@@ -303,8 +303,11 @@ settings.delete_db()   # interactive confirmation + 6-digit code required
 ![Model Comparison Dashboard](<Screenshot 2026-05-12 175014.png>)
 ![Sunburst Infographics Explorer](<Screenshot 2026-05-12 175105.png>)
 ![Leaderboard View](<Screenshot 2026-05-12 174956.png>)
+<img width="985" height="651" alt="Untitled Diagram drawio" src="https://github.com/user-attachments/assets/b32b18c3-3901-4257-ab42-b733306b1681" />
+
 
 ---
+
 
 ## Dependencies
 
